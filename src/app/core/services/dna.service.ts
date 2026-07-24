@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {DNAMutantResult, DNAValidationResult} from '../models/dna-result.model';
+import {DNAMutantResult, DNAValidationResult} from '@app/core/models/dna-result.model';
 
 interface Direction {
   dx: number;
