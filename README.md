@@ -5,7 +5,7 @@ El algoritmo recibe una matriz NxN compuesta por las bases nitrogenadas **A**, *
 
 Sobre esa solución se construyó una aplicación web interactiva en Angular que permite visualizar y probar el algoritmo.
 
-**Demo en vivo:** [detector-mutantes.vercel.app](https://detector-mutantes.vercel.app)
+**Demo en vivo:** [https://seti-detector-mutantes.vercel.app/](https://seti-detector-mutantes.vercel.app/)
 
 ---
 
