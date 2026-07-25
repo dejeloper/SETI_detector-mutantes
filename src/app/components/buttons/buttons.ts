@@ -10,6 +10,7 @@ export class Buttons {
 
   loadMutant = output<void>();
   loadHuman = output<void>();
+  randomize = output<void>();
   validate = output<void>();
   edit = output<void>();
 
@@ -19,6 +20,10 @@ export class Buttons {
 
   protected onLoadHuman(): void {
     this.loadHuman.emit();
+  }
+
+  protected onRandomize(): void {
+    this.randomize.emit();
   }
 
   protected onValidate(): void {

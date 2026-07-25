@@ -1,4 +1,5 @@
 <button type="button" [disabled]="editing()" (click)="onLoadMutant()">Cargar ADN mutante</button>
 <button type="button" [disabled]="editing()" (click)="onLoadHuman()">Cargar ADN humano</button>
+<button type="button" [disabled]="editing()" (click)="onRandomize()">Generar aleatorio</button>
 <button type="button" [disabled]="editing()" (click)="onValidate()">Validar ADN</button>
 <button type="button" (click)="onEdit()">{{ editing() ? 'Guardar' : 'Editar ADN' }}</button>

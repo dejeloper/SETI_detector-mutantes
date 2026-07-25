@@ -49,6 +49,11 @@ export class Board {
     this.resultMessage.set('');
   }
 
+  protected onRandomize(): void {
+    this.dna.set(this.dnaService.generateRandom(this.dna().length));
+    this.resultMessage.set('');
+  }
+
   protected onValidate(): void {
     const result = this.dnaService.isMutant(this.dna());
     if (result.hasError) {
