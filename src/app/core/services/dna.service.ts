@@ -1,9 +1,11 @@
 import {Injectable} from '@angular/core';
-import {DNAMutantResult, DNAValidationResult} from '@app/core/models/dna-result.model';
+import {DNAMutantResult} from '@app/core/models/dna-result.model';
+import {DNAStep, DNAStepCell, DNAStepDirection, DNAStepScanResult} from '@app/core/models/dna-step.model';
 
 interface Direction {
   dx: number;
   dy: number;
+  name: DNAStepDirection;
 }
 
 const SEQUENCE_LENGTH = 4;
@@ -12,10 +14,10 @@ const MIN_SEQUENCES_FOR_MUTANT = 2;
 const VALID_BASES_PATTERN = /^[ATCG]+$/;
 const BASES = ['A', 'T', 'C', 'G'] as const;
 const DIRECTIONS: Direction[] = [
-  {dx: 0, dy: 1}, // horizontal
-  {dx: 1, dy: 0}, // vertical
-  {dx: 1, dy: 1}, // diagonal ↘
-  {dx: 1, dy: -1} // diagonal ↙
+  {dx: 0, dy: 1, name: 'horizontal'},
+  {dx: 1, dy: 0, name: 'vertical'},
+  {dx: 1, dy: 1, name: 'diagonal-derecha'},
+  {dx: 1, dy: -1, name: 'diagonal-izquierda'}
 ];
 
 @Injectable({
@@ -25,93 +27,151 @@ export class DNAService {
   readonly mutantDNAExample: string[] = ['ATGCGA', 'CAGTGC', 'TTATGT', 'AGAAGG', 'CCCCTA', 'TCACTG'];
   readonly humanDNAExample: string[] = ['ATGCGA', 'CAGTGC', 'TTATTT', 'AGACGG', 'GCGTCA', 'TCACTG'];
 
+  // genera una matriz cuadrada de bases aleatorias del tamaño indicado
   generateRandom(size: number): string[] {
     return Array.from({length: size}, () => this.generateRandomRow(size));
   }
 
+  // genera una fila de bases aleatorias
   private generateRandomRow(size: number): string {
     return Array.from({length: size}, () => this.randomBase()).join('');
   }
 
+  // elige una base al azar entre A, T, C y G
   private randomBase(): string {
     return BASES[Math.floor(Math.random() * BASES.length)];
   }
 
+  // valida el ADN y determina si es mutante (2 o más secuencias)
   isMutant(dna: string[]): DNAMutantResult {
     if (dna.length === 0) {
-      return {isMutant: false, hasError: false, errorMessage: null};
+      return {hasError: false, errorMessage: null, isMutant: false};
     }
 
-    // valida que sea cuadrada y que solo tenga bases válidas
-    const validation = this.validateShape(dna);
-    if (validation.hasError) {
-      return {isMutant: false, ...validation};
+    const errorMessage = this.validateShape(dna);
+    if (errorMessage) {
+      return {hasError: true, errorMessage, isMutant: false};
     }
 
-    // es mutante si encuentra 2 o más secuencias de 4 bases iguales
-    const isMutant = this.countSequences(dna) >= MIN_SEQUENCES_FOR_MUTANT;
-    return {isMutant, hasError: false, errorMessage: null};
+    return {hasError: false, errorMessage: null, isMutant: this.hasMutantSequences(dna)};
   }
 
-  private validateShape(dna: string[]): DNAValidationResult {
-    const size = dna.length;
-
-    // esto valida que la matriz sea cuadrada y tenga caracteres válidos
-    for (const row of dna) {
-      if (row.length !== size) {
-        return {hasError: true, errorMessage: 'La matriz de ADN debe ser cuadrada.'};
-      }
-      if (!VALID_BASES_PATTERN.test(row)) {
-        return {hasError: true, errorMessage: 'El ADN contiene caracteres inválidos.'};
-      }
+  // igual que isMutant, pero además devuelve cada comparación hecha (para animar el recorrido)
+  scan(dna: string[]): DNAStepScanResult {
+    if (dna.length === 0) {
+      return {hasError: false, errorMessage: null, isMutant: false, steps: []};
     }
 
-    return {hasError: false, errorMessage: null};
-  }
+    const errorMessage = this.validateShape(dna);
+    if (errorMessage) {
+      return {hasError: true, errorMessage, isMutant: false, steps: []};
+    }
 
-  private countSequences(dna: string[]): number {
-    let sequences = 0;
+    const steps: DNAStep[] = [];
+    let matches = 0;
 
     for (let row = 0; row < dna.length; row++) {
       for (let col = 0; col < dna.length; col++) {
-        sequences += this.countSequencesFrom(dna, row, col);
-        // corta apenas se llega al mínimo, no hace falta seguir buscando
-        if (sequences >= MIN_SEQUENCES_FOR_MUTANT) {
-          return sequences;
+        for (const direction of DIRECTIONS) {
+          const cells = this.buildCells(dna.length, row, col, direction);
+          if (!cells) {
+            continue;
+          }
+
+          const matched = this.allCellsEqual(dna, cells);
+          steps.push({direction: direction.name, cells, matched});
+
+          if (!matched) {
+            continue;
+          }
+
+          matches++;
+          if (matches >= MIN_SEQUENCES_FOR_MUTANT) {
+            return {hasError: false, errorMessage: null, isMutant: true, steps};
+          }
         }
       }
     }
 
-    return sequences;
+    return {hasError: false, errorMessage: null, isMutant: false, steps};
   }
 
-  private countSequencesFrom(dna: string[], row: number, col: number): number {
-    return DIRECTIONS.filter((direction) => this.hasSequence(dna, row, col, direction)).length;
-  }
+  // recorre el tablero sin construir los objetos de paso, ya que isMutant() no los necesita
+  private hasMutantSequences(dna: string[]): boolean {
+    const size = dna.length;
+    let matches = 0;
 
-  // compara cada base siguiente contra la base inicial
-  private hasSequence(dna: string[], row: number, col: number, direction: Direction): boolean {
-    if (!this.fitsInMatrix(dna.length, row, col, direction)) {
-      return false;
-    }
+    for (let row = 0; row < size; row++) {
+      for (let col = 0; col < size; col++) {
+        for (const direction of DIRECTIONS) {
+          if (!this.isSequenceInBounds(size, row, col, direction)) {
+            continue;
+          }
 
-    const base = dna[row][col];
+          if (!this.hasMatchingSequence(dna, row, col, direction)) {
+            continue;
+          }
 
-    for (let step = 1; step < SEQUENCE_LENGTH; step++) {
-      const currentRow = row + direction.dx * step;
-      const currentCol = col + direction.dy * step;
-      if (dna[currentRow][currentCol] !== base) {
-        return false;
+          matches++;
+          if (matches >= MIN_SEQUENCES_FOR_MUTANT) {
+            return true;
+          }
+        }
       }
     }
 
-    return true;
+    return false;
   }
 
-  // calcula la celda final de la secuencia y revisa que quede dentro de la matriz
-  private fitsInMatrix(size: number, row: number, col: number, direction: Direction): boolean {
+  // revisa si una secuencia de 4 bases desde (row, col) en esa dirección cabe en la matriz
+  private isSequenceInBounds(size: number, row: number, col: number, direction: Direction): boolean {
     const endRow = row + direction.dx * (SEQUENCE_LENGTH - 1);
     const endCol = col + direction.dy * (SEQUENCE_LENGTH - 1);
     return endRow >= 0 && endRow < size && endCol >= 0 && endCol < size;
+  }
+
+  // compara cada base siguiente contra la base inicial
+  private hasMatchingSequence(dna: string[], row: number, col: number, direction: Direction): boolean {
+    const base = dna[row][col];
+    for (let step = 1; step < SEQUENCE_LENGTH; step++) {
+      if (dna[row + direction.dx * step][col + direction.dy * step] !== base) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // valida que la matriz sea cuadrada y solo tenga bases válidas
+  private validateShape(dna: string[]): string | null {
+    const size = dna.length;
+
+    for (const row of dna) {
+      if (row.length !== size) {
+        return 'La matriz de ADN debe ser cuadrada.';
+      }
+      if (!VALID_BASES_PATTERN.test(row)) {
+        return 'El ADN contiene caracteres inválidos.';
+      }
+    }
+
+    return null;
+  }
+
+  // calcula las 4 celdas de una posible secuencia, o null si no cabe en la matriz
+  private buildCells(size: number, row: number, col: number, direction: Direction): DNAStepCell[] | null {
+    if (!this.isSequenceInBounds(size, row, col, direction)) {
+      return null;
+    }
+
+    return Array.from({length: SEQUENCE_LENGTH}, (_, step) => ({
+      row: row + direction.dx * step,
+      col: col + direction.dy * step
+    }));
+  }
+
+  // true si todas las celdas dadas tienen la misma base
+  private allCellsEqual(dna: string[], cells: DNAStepCell[]): boolean {
+    const base = dna[cells[0].row][cells[0].col];
+    return cells.every((cell) => dna[cell.row][cell.col] === base);
   }
 }
