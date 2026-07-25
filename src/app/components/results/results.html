@@ -1,3 +1,20 @@
-@if (message()) {
-  <p class="results">{{ message() }}</p>
-}
+<div class="lab-window">
+  <div class="lab-window-bar">
+    <span class="lab-window-dot"></span>
+    <span class="lab-window-dot"></span>
+    <span class="lab-window-dot"></span>
+    <span class="lab-window-title">Resultado del laboratorio</span>
+  </div>
+  <div class="lab-window-body" [class]="'results--' + status()">
+    @if (message()) {
+      @if (status() === 'mutant') {
+        <app-mutant-icon size="72px" />
+      } @else if (status() === 'safe') {
+        <app-human-icon size="72px" />
+      }
+      <p>{{ message() }}</p>
+    } @else {
+      <p class="lab-window-placeholder">Sin resultados aún</p>
+    }
+  </div>
+</div>
