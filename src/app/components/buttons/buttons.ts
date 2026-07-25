@@ -1,7 +1,13 @@
 import {Component, input, output} from '@angular/core';
+import {MutantIcon} from '@app/components/icons/mutant-icon/mutant-icon';
+import {HumanIcon} from '@app/components/icons/human-icon/human-icon';
+import {MicroscopeIcon} from '@app/components/icons/microscope-icon/microscope-icon';
+import {ShuffleIcon} from '@app/components/icons/shuffle-icon/shuffle-icon';
+import {PencilIcon} from '@app/components/icons/pencil-icon/pencil-icon';
 
 @Component({
   selector: 'app-buttons',
+  imports: [MutantIcon, HumanIcon, MicroscopeIcon, ShuffleIcon, PencilIcon],
   templateUrl: './buttons.html',
   styleUrl: './buttons.css'
 })
