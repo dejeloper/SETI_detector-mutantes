@@ -2,16 +2,25 @@
   <app-grid
     [dna]="dna()"
     [editable]="isEditing()"
+    [stepCells]="currentStepCells()"
+    [matchedCells]="matchedCells()"
+    [isMutant]="isMutant()"
     (dnaChange)="onDnaChange($event)"
     (cellError)="onGridError($event)"
   />
   <app-buttons
     [editing]="isEditing()"
+    [stepping]="isStepMode()"
+    [stepPlaying]="isStepPlaying()"
+    [stepFinished]="isStepFinished()"
     (loadMutant)="onLoadMutant()"
     (loadHuman)="onLoadHuman()"
     (randomize)="onRandomize()"
     (validate)="onValidate()"
     (edit)="onEdit()"
+    (stepThrough)="onStepThrough()"
+    (togglePlayback)="onToggleStepPlayback()"
+    (nextStep)="onNextStep()"
   />
   @if (resultMessage() && !isEditing()) {
     <app-results [message]="resultMessage()" [status]="resultStatus()" />
