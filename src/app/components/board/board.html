@@ -1,4 +1,10 @@
 <section class="board">
+  <app-grid
+    [dna]="dna()"
+    [editable]="isEditing()"
+    (dnaChange)="onDnaChange($event)"
+    (cellError)="onGridError($event)"
+  />
   <app-buttons
     [editing]="isEditing()"
     (loadMutant)="onLoadMutant()"
@@ -7,11 +13,7 @@
     (validate)="onValidate()"
     (edit)="onEdit()"
   />
-  <app-grid
-    [dna]="dna()"
-    [editable]="isEditing()"
-    (dnaChange)="onDnaChange($event)"
-    (cellError)="onGridError($event)"
-  />
-  <app-results [message]="resultMessage()" />
+  @if (resultMessage()) {
+    <app-results [message]="resultMessage()" [status]="resultStatus()" />
+  }
 </section>
