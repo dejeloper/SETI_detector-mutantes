@@ -2,6 +2,11 @@ import {Component, computed, input, output} from '@angular/core';
 
 const VALID_BASE_PATTERN = /^[ATCG]$/;
 
+interface HighlightCell {
+  row: number;
+  col: number;
+}
+
 @Component({
   selector: 'app-grid',
   templateUrl: './grid.html',
@@ -10,11 +15,22 @@ const VALID_BASE_PATTERN = /^[ATCG]$/;
 export class Grid {
   dna = input<string[]>([]);
   editable = input<boolean>(false);
+  stepCells = input<HighlightCell[]>([]);
+  matchedCells = input<HighlightCell[]>([]);
+  isMutant = input<boolean>(false);
 
   dnaChange = output<string[]>();
   cellError = output<string>();
 
   protected readonly columns = computed(() => this.dna().length);
+
+  protected isStepCell(rowIndex: number, colIndex: number): boolean {
+    return this.stepCells().some((cell) => cell.row === rowIndex && cell.col === colIndex);
+  }
+
+  protected isMatchedCell(rowIndex: number, colIndex: number): boolean {
+    return this.matchedCells().some((cell) => cell.row === rowIndex && cell.col === colIndex);
+  }
 
   protected splitRow(row: string): string[] {
     return row.split('');

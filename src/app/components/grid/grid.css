@@ -30,3 +30,22 @@
 .grid-cell-input:focus {
   border-width: 2px;
 }
+
+.grid-cell-step {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.grid-cell-matched {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: #ffffff;
+}
+
+.grid-cell-matched-mutant {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: #ffffff;
+}

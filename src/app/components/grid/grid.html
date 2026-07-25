@@ -11,7 +11,12 @@
             (input)="onCellInput(r, c, $any($event.target))"
           />
         } @else {
-          <span class="grid-cell">{{ base }}</span>
+          <span
+            class="grid-cell"
+            [class.grid-cell-matched]="isMatchedCell(r, c) && !isMutant()"
+            [class.grid-cell-matched-mutant]="isMatchedCell(r, c) && isMutant()"
+            [class.grid-cell-step]="isStepCell(r, c) && !isMatchedCell(r, c)"
+          >{{ base }}</span>
         }
       }
     }
