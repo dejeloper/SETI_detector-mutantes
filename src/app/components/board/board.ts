@@ -59,7 +59,12 @@ export class Board {
   }
 
   protected onEdit(): void {
-    this.isEditing.update((editing) => !editing);
+    const wasEditing = this.isEditing();
+    this.isEditing.set(!wasEditing);
+
+    if (wasEditing) {
+      this.onValidate();
+    }
   }
 
   protected onDnaChange(dna: string[]): void {
