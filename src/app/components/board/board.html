@@ -13,7 +13,7 @@
     (validate)="onValidate()"
     (edit)="onEdit()"
   />
-  @if (resultMessage()) {
+  @if (resultMessage() && !isEditing()) {
     <app-results [message]="resultMessage()" [status]="resultStatus()" />
   }
 </section>
