@@ -1,8 +1,10 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, DestroyRef, effect, inject, signal} from '@angular/core';
 import {Buttons} from '@app/components/buttons/buttons';
 import {Results} from '@app/components/results/results';
 import {Grid} from '@app/components/grid/grid';
 import {DNAService} from '@app/core/services/dna.service';
+
+const DNA_STORAGE_KEY = 'dna-grid';
 
 @Component({
   selector: 'app-board',
@@ -13,8 +15,28 @@ import {DNAService} from '@app/core/services/dna.service';
 export class Board {
   private readonly dnaService = inject(DNAService);
 
-  protected readonly dna = signal<string[]>(this.dnaService.mutantDNAExample);
+  protected readonly dna = signal<string[]>(this.loadStoredDna() ?? this.dnaService.mutantDNAExample);
   protected readonly resultMessage = signal('');
+
+  constructor() {
+    effect(() => {
+      sessionStorage.setItem(DNA_STORAGE_KEY, JSON.stringify(this.dna()));
+    });
+
+    const onStorageChange = (event: StorageEvent): void => {
+      if (event.storageArea === sessionStorage && event.key === DNA_STORAGE_KEY && event.newValue) {
+        this.dna.set(JSON.parse(event.newValue));
+      }
+    };
+
+    window.addEventListener('storage', onStorageChange);
+    inject(DestroyRef).onDestroy(() => window.removeEventListener('storage', onStorageChange));
+  }
+
+  private loadStoredDna(): string[] | null {
+    const stored = sessionStorage.getItem(DNA_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : null;
+  }
 
   protected onLoadMutant(): void {
     this.dna.set(this.dnaService.mutantDNAExample);
