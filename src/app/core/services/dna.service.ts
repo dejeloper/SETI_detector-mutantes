@@ -10,6 +10,7 @@ const SEQUENCE_LENGTH = 4;
 const MIN_SEQUENCES_FOR_MUTANT = 2;
 // solo se permiten las bases A, T, C, G
 const VALID_BASES_PATTERN = /^[ATCG]+$/;
+const BASES = ['A', 'T', 'C', 'G'] as const;
 const DIRECTIONS: Direction[] = [
   {dx: 0, dy: 1}, // horizontal
   {dx: 1, dy: 0}, // vertical
@@ -23,6 +24,18 @@ const DIRECTIONS: Direction[] = [
 export class DNAService {
   readonly mutantDNAExample: string[] = ['ATGCGA', 'CAGTGC', 'TTATGT', 'AGAAGG', 'CCCCTA', 'TCACTG'];
   readonly humanDNAExample: string[] = ['ATGCGA', 'CAGTGC', 'TTATTT', 'AGACGG', 'GCGTCA', 'TCACTG'];
+
+  generateRandom(size: number): string[] {
+    return Array.from({length: size}, () => this.generateRandomRow(size));
+  }
+
+  private generateRandomRow(size: number): string {
+    return Array.from({length: size}, () => this.randomBase()).join('');
+  }
+
+  private randomBase(): string {
+    return BASES[Math.floor(Math.random() * BASES.length)];
+  }
 
   isMutant(dna: string[]): DNAMutantResult {
     if (dna.length === 0) {
