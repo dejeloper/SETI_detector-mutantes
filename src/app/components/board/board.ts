@@ -1,6 +1,6 @@
 import {Component, DestroyRef, effect, inject, signal} from '@angular/core';
 import {Buttons} from '@app/components/buttons/buttons';
-import {Results} from '@app/components/results/results';
+import {Results, ResultStatus} from '@app/components/results/results';
 import {Grid} from '@app/components/grid/grid';
 import {DNAService} from '@app/core/services/dna.service';
 
@@ -17,6 +17,7 @@ export class Board {
 
   protected readonly dna = signal<string[]>(this.loadStoredDna() ?? this.dnaService.mutantDNAExample);
   protected readonly resultMessage = signal('');
+  protected readonly resultStatus = signal<ResultStatus>('neutral');
   protected readonly isEditing = signal(false);
 
   constructor() {
@@ -41,26 +42,26 @@ export class Board {
 
   protected onLoadMutant(): void {
     this.dna.set(this.dnaService.mutantDNAExample);
-    this.resultMessage.set('');
+    this.clearResult();
   }
 
   protected onLoadHuman(): void {
     this.dna.set(this.dnaService.humanDNAExample);
-    this.resultMessage.set('');
+    this.clearResult();
   }
 
   protected onRandomize(): void {
     this.dna.set(this.dnaService.generateRandom(this.dna().length));
-    this.resultMessage.set('');
+    this.clearResult();
   }
 
   protected onValidate(): void {
     const result = this.dnaService.isMutant(this.dna());
     if (result.hasError) {
-      this.resultMessage.set(result.errorMessage ?? 'Error desconocido');
+      this.setResult(result.errorMessage ?? 'Error desconocido', 'error');
       return;
     }
-    this.resultMessage.set(result.isMutant ? 'ADN mutante' : 'ADN no mutante');
+    this.setResult(result.isMutant ? 'ADN mutante' : 'ADN no mutante', result.isMutant ? 'mutant' : 'safe');
   }
 
   protected onEdit(): void {
@@ -74,10 +75,19 @@ export class Board {
 
   protected onDnaChange(dna: string[]): void {
     this.dna.set(dna);
-    this.resultMessage.set('');
+    this.clearResult();
   }
 
   protected onGridError(message: string): void {
+    this.setResult(message, 'error');
+  }
+
+  private setResult(message: string, status: ResultStatus): void {
     this.resultMessage.set(message);
+    this.resultStatus.set(status);
+  }
+
+  private clearResult(): void {
+    this.setResult('', 'neutral');
   }
 }
