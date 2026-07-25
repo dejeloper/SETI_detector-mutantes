@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, input} from '@angular/core';
+import {Component, input} from '@angular/core';
 import {HumanIcon} from '@app/components/icons/human-icon/human-icon';
 import {MutantIcon} from '@app/components/icons/mutant-icon/mutant-icon';
 
@@ -8,6 +8,7 @@ export type ResultStatus = 'neutral' | 'error' | 'mutant' | 'safe';
   selector: 'app-results',
   templateUrl: './results.html',
   styleUrl: './results.css',
+  imports: [MutantIcon, HumanIcon],
 })
 export class Results {
   message = input<string>('');
