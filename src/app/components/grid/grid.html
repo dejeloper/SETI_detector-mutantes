@@ -1,0 +1,9 @@
+@if (dna().length) {
+  <div class="grid" [style.grid-template-columns]="'repeat(' + columns() + ', 1fr)'">
+    @for (row of dna(); track $index) {
+      @for (base of splitRow(row); track $index) {
+        <span class="grid-cell">{{ base }}</span>
+      }
+    }
+  </div>
+}

@@ -1,5 +1,4 @@
-import {Component, inject, output} from '@angular/core';
-import {DNAService} from '../../core/services/dna.service';
+import {Component, output} from '@angular/core';
 
 @Component({
   selector: 'app-buttons',
@@ -7,28 +6,19 @@ import {DNAService} from '../../core/services/dna.service';
   styleUrl: './buttons.css'
 })
 export class Buttons {
-  private readonly dnaService = inject(DNAService);
+  loadMutant = output<void>();
+  loadHuman = output<void>();
+  validate = output<void>();
 
-  validated = output<string>();
+  protected onLoadMutant(): void {
+    this.loadMutant.emit();
+  }
+
+  protected onLoadHuman(): void {
+    this.loadHuman.emit();
+  }
 
   protected onValidate(): void {
-    this.validated.emit(this.dnaService.validate());
-  }
-
-  protected onValidateMutant(): void {
-    this.emitMutantResult(this.dnaService.mutantDNAExample);
-  }
-
-  protected onValidateHuman(): void {
-    this.emitMutantResult(this.dnaService.humanDNAExample);
-  }
-
-  private emitMutantResult(dna: string[]): void {
-    const result = this.dnaService.isMutant(dna);
-    if (result.hasError) {
-      this.validated.emit(result.errorMessage ?? 'Error desconocido');
-      return;
-    }
-    this.validated.emit(result.isMutant ? 'ADN mutante' : 'ADN no mutante');
+    this.validate.emit();
   }
 }

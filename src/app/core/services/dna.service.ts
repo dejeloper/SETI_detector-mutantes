@@ -24,10 +24,6 @@ export class DNAService {
   readonly mutantDNAExample: string[] = ['ATGCGA', 'CAGTGC', 'TTATGT', 'AGAAGG', 'CCCCTA', 'TCACTG'];
   readonly humanDNAExample: string[] = ['ATGCGA', 'CAGTGC', 'TTATTT', 'AGACGG', 'GCGTCA', 'TCACTG'];
 
-  validate(): string {
-    return 'ADN validado';
-  }
-
   isMutant(dna: string[]): DNAMutantResult {
     if (dna.length === 0) {
       return {isMutant: false, hasError: false, errorMessage: null};

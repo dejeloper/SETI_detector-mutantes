@@ -1,0 +1,17 @@
+.grid {
+  display: grid;
+  gap: 4px;
+  width: fit-content;
+  padding: 8px;
+  border: 2px solid #333;
+}
+
+.grid-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid currentColor;
+  font-family: monospace;
+}

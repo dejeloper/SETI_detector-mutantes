@@ -1,4 +1,9 @@
 <section class="board">
-  <app-buttons (validated)="onValidated($event)" />
+  <app-buttons
+    (loadMutant)="onLoadMutant()"
+    (loadHuman)="onLoadHuman()"
+    (validate)="onValidate()"
+  />
+  <app-grid [dna]="dna()" />
   <app-results [message]="resultMessage()" />
 </section>
