@@ -1,8 +1,18 @@
 @if (dna().length) {
   <div class="grid" [style.grid-template-columns]="'repeat(' + columns() + ', 1fr)'">
-    @for (row of dna(); track $index) {
-      @for (base of splitRow(row); track $index) {
-        <span class="grid-cell">{{ base }}</span>
+    @for (row of dna(); track $index; let r = $index) {
+      @for (base of splitRow(row); track $index; let c = $index) {
+        @if (editable()) {
+          <input
+            class="grid-cell grid-cell-input"
+            type="text"
+            maxlength="1"
+            [value]="base"
+            (input)="onCellInput(r, c, $any($event.target))"
+          />
+        } @else {
+          <span class="grid-cell">{{ base }}</span>
+        }
       }
     }
   </div>
