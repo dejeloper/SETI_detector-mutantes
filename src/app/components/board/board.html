@@ -1,9 +1,16 @@
 <section class="board">
   <app-buttons
+    [editing]="isEditing()"
     (loadMutant)="onLoadMutant()"
     (loadHuman)="onLoadHuman()"
     (validate)="onValidate()"
+    (edit)="onEdit()"
   />
-  <app-grid [dna]="dna()" />
+  <app-grid
+    [dna]="dna()"
+    [editable]="isEditing()"
+    (dnaChange)="onDnaChange($event)"
+    (cellError)="onGridError($event)"
+  />
   <app-results [message]="resultMessage()" />
 </section>

@@ -17,6 +17,7 @@ export class Board {
 
   protected readonly dna = signal<string[]>(this.loadStoredDna() ?? this.dnaService.mutantDNAExample);
   protected readonly resultMessage = signal('');
+  protected readonly isEditing = signal(false);
 
   constructor() {
     effect(() => {
@@ -55,5 +56,18 @@ export class Board {
       return;
     }
     this.resultMessage.set(result.isMutant ? 'ADN mutante' : 'ADN no mutante');
+  }
+
+  protected onEdit(): void {
+    this.isEditing.update((editing) => !editing);
+  }
+
+  protected onDnaChange(dna: string[]): void {
+    this.dna.set(dna);
+    this.resultMessage.set('');
+  }
+
+  protected onGridError(message: string): void {
+    this.resultMessage.set(message);
   }
 }
