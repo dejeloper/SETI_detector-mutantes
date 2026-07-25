@@ -1,4 +1,4 @@
-import {Component, output} from '@angular/core';
+import {Component, input, output} from '@angular/core';
 
 @Component({
   selector: 'app-buttons',
@@ -6,9 +6,12 @@ import {Component, output} from '@angular/core';
   styleUrl: './buttons.css'
 })
 export class Buttons {
+  editing = input<boolean>(false);
+
   loadMutant = output<void>();
   loadHuman = output<void>();
   validate = output<void>();
+  edit = output<void>();
 
   protected onLoadMutant(): void {
     this.loadMutant.emit();
@@ -20,5 +23,9 @@ export class Buttons {
 
   protected onValidate(): void {
     this.validate.emit();
+  }
+
+  protected onEdit(): void {
+    this.edit.emit();
   }
 }
