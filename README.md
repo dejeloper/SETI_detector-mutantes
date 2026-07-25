@@ -166,6 +166,18 @@ App -> Board(Grid, Buttons, Results) -> DNAService(isMutant(), scan())
 
 ---
 
+## Pruebas
+
+El proyecto tiene pruebas unitarias con [Vitest](https://vitest.dev/) que cubren tanto el algoritmo (`DNAService`) como el comportamiento de la interfaz (`Board`, `Grid`, `Buttons`), incluyendo el modo paso a paso y la persistencia en `sessionStorage`.
+
+Para ejecutarlas:
+
+```bash
+pnpm test
+```
+
+---
+
 ## Decisiones de diseño
 
 - El algoritmo está desacoplado de Angular: vive en `DNAService` y no depende de nada de la interfaz.

@@ -101,6 +101,124 @@ describe('DNAService', () => {
     });
   });
 
+  describe('scan', () => {
+    it('should return no steps for an empty DNA array', () => {
+      const result = service.scan([]);
+
+      expect(result).toEqual({hasError: false, errorMessage: null, isMutant: false, steps: []});
+    });
+
+    it('should return an error with no steps when the matrix is not square', () => {
+      const dna = ['ATGC', 'CAGT', 'TTAT'];
+
+      const result = service.scan(dna);
+
+      expect(result).toEqual({
+        hasError: true,
+        errorMessage: 'La matriz de ADN debe ser cuadrada.',
+        isMutant: false,
+        steps: []
+      });
+    });
+
+    it('should return an error with no steps when the DNA contains invalid characters', () => {
+      const dna = ['ATGX', 'CAGT', 'TTAT', 'AGAA'];
+
+      const result = service.scan(dna);
+
+      expect(result).toEqual({
+        hasError: true,
+        errorMessage: 'El ADN contiene caracteres inválidos.',
+        isMutant: false,
+        steps: []
+      });
+    });
+
+    it('should stop recording steps as soon as the second matching sequence is found', () => {
+      const dna = ['ATCG', 'ATCG', 'ATCG', 'ATCC'];
+
+      const result = service.scan(dna);
+
+      expect(result.isMutant).toBe(true);
+      const matchedSteps = result.steps.filter((step) => step.matched);
+      expect(matchedSteps.length).toBe(2);
+      expect(result.steps[result.steps.length - 1].matched).toBe(true);
+    });
+
+    it('should describe each step with a direction, 4 cells and whether it matched', () => {
+      const dna = ['ATCG', 'ATCG', 'ATCG', 'ATCC'];
+
+      const result = service.scan(dna);
+
+      result.steps.forEach((step) => {
+        expect(['horizontal', 'vertical', 'diagonal-derecha', 'diagonal-izquierda']).toContain(step.direction);
+        expect(step.cells.length).toBe(4);
+        expect(typeof step.matched).toBe('boolean');
+      });
+
+      expect(result.steps[0]).toEqual({
+        direction: 'horizontal',
+        cells: [
+          {row: 0, col: 0},
+          {row: 0, col: 1},
+          {row: 0, col: 2},
+          {row: 0, col: 3}
+        ],
+        matched: false
+      });
+    });
+
+    it('should traverse every possible step without cutting for a human DNA with no sequences', () => {
+      const dna = ['ATGC', 'CGTA', 'GCAT', 'TACG'];
+
+      const result = service.scan(dna);
+
+      expect(result.isMutant).toBe(false);
+      expect(result.steps.length).toBeGreaterThan(0);
+      expect(result.steps.every((step) => !step.matched)).toBe(true);
+    });
+  });
+
+  describe('documented edge cases', () => {
+    it('Case 1 — empty matrix: cuts before reaching validateShape', () => {
+      const result = service.isMutant([]);
+
+      expect(result).toEqual({hasError: false, errorMessage: null, isMutant: false});
+    });
+
+    it('Case 2 — valid matrix (mutant example): passes validateShape and detects 2 sequences', () => {
+      const dna = ['ATGCGA', 'CAGTGC', 'TTATGT', 'AGAAGG', 'CCCCTA', 'TCACTG'];
+
+      const result = service.isMutant(dna);
+
+      expect(result).toEqual({hasError: false, errorMessage: null, isMutant: true});
+    });
+
+    it('Case 3 — non-square matrix: cuts at the first row whose length does not match size', () => {
+      const dna = ['ATGC', 'CGTA', 'TTAAA'];
+
+      const result = service.isMutant(dna);
+
+      expect(result).toEqual({
+        hasError: true,
+        errorMessage: 'La matriz de ADN debe ser cuadrada.',
+        isMutant: false
+      });
+    });
+
+    it('Case 4 — invalid character: cuts at the row containing the disallowed character', () => {
+      const dna = ['ATGC', 'CGTA', 'TTXA', 'GGCC'];
+
+      const result = service.isMutant(dna);
+
+      expect(result).toEqual({
+        hasError: true,
+        errorMessage: 'El ADN contiene caracteres inválidos.',
+        isMutant: false
+      });
+    });
+  });
+
   describe('generateRandom', () => {
     it('should generate a square matrix of the requested size', () => {
       const dna = service.generateRandom(6);
