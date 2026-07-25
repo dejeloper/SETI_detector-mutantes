@@ -1,28 +1,51 @@
 <div class="buttons">
-  <div class="buttons-demo">
-    <button type="button" class="btn btn-demo" [disabled]="editing()" (click)="onLoadMutant()">
+  <div class="buttons-row">
+    <button type="button" class="btn btn-demo" [disabled]="editing() || stepping()" (click)="onLoadMutant()">
       <app-mutant-icon size="28px" />
       Demo Mutante
     </button>
-    <button type="button" class="btn btn-demo" [disabled]="editing()" (click)="onLoadHuman()">
+    <button type="button" class="btn btn-demo" [disabled]="editing() || stepping()" (click)="onLoadHuman()">
       <app-human-icon size="28px" />
       Demo Humano
     </button>
-  </div>
-
-  <div class="buttons-secondary">
-    <button type="button" class="btn" [disabled]="editing()" (click)="onRandomize()">
+    <button type="button" class="btn" [disabled]="editing() || stepping()" (click)="onRandomize()">
       <app-shuffle-icon size="24px" />
       Generar aleatorio
     </button>
-    <button type="button" class="btn btn-accent" (click)="onEdit()">
+  </div>
+
+  <div class="buttons-row">
+    <button type="button" class="btn btn-full" [disabled]="editing() || stepping()" (click)="onValidate()">
+      <app-microscope-icon size="28px" />
+      Validar ADN
+    </button>
+    <button type="button" class="btn btn-accent" [disabled]="stepping()" (click)="onEdit()">
       <app-pencil-icon size="20px" />
       {{ editing() ? 'Guardar' : 'Editar ADN' }}
     </button>
   </div>
 
-  <button type="button" class="btn btn-full" [disabled]="editing()" (click)="onValidate()">
-    <app-microscope-icon size="28px" />
-    Validar ADN
-  </button>
+  <div class="buttons-row">
+    <button
+      type="button"
+      class="btn btn-step"
+      [class.btn-step-closing]="stepping()"
+      [disabled]="editing()"
+      (click)="onStepThrough()"
+    >
+      @if (!stepping()) {
+        <app-dna-icon size="24px" />
+      }
+      {{ stepping() ? 'Cerrar paso a paso' : 'Paso a paso' }}
+    </button>
+
+    @if (stepping()) {
+      <button type="button" class="btn btn-step-play" [disabled]="stepFinished()" (click)="onTogglePlayback()">
+        {{ stepPlaying() ? 'Pausar' : 'Reanudar' }}
+      </button>
+      <button type="button" class="btn btn-step-next" [disabled]="stepPlaying() || stepFinished()" (click)="onNextStep()">
+        Siguiente
+      </button>
+    }
+  </div>
 </div>
